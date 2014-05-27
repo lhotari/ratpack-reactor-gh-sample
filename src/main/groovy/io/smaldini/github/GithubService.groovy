@@ -82,7 +82,9 @@ class GithubService {
 
 		//prepare a deferred stream
 		final deferredResult = Streams.<String> defer().get()
-		def stream = deferredResult.compose().bufferWithErrors()
+		def stream = deferredResult.compose() //.bufferWithErrors()
+
+		println "getting for $unescapedOrgId"
 
 		//call yo github asynchronously
 		get(githubApiUrl + orgsApiSuffix.replace(URI_PARAM_ORG, orgId), deferredResult){ Response response ->
@@ -101,10 +103,11 @@ class GithubService {
 
 			//notify the deferred Stream
 			for(repo in result){
-				deferredResult << repo
+				println "repo $repo deferred"
+				deferredResult.accept repo
 			}
-
-			deferredResult.flush()
+			//println "FLUSH"
+			//deferredResult.flush()
 
 		}
 
@@ -187,7 +190,7 @@ class GithubService {
 			void onThrowable(Throwable t) {
 				//GithubService.log.error url, t
 				deferredResult.accept new GithubException("github service can't be contated: $t.message")
-				deferredResult.flush()
+				//deferredResult.flush()
 			}
 		})
 	}

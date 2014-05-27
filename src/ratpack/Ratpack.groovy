@@ -45,11 +45,10 @@ ratpack {
 									Tuple2.of(repo, pr)
 								}
 							}.
-
-							collect().
-
+							collect(20).
 					// sort the previously collected repo/pr pair list per PR (t2) and Repo name (t1)
-							consume { List<Tuple2<String, Integer>> tupleList ->
+							map { List<Tuple2<String, Integer>> tupleList ->
+								println "tupleList size ${tupleList.size()}"
 								tupleList.sort { Tuple2<String, Integer> e1, Tuple2<String, Integer> e2 ->
 									e2.t2 == e1.t2 ? e1.t1 <=> e2.t1 : e2.t2 <=> e1.t2
 								}
@@ -60,18 +59,23 @@ ratpack {
 								tupleList.size() > 5 ? tupleList[0..5] : tupleList
 							}.
 
+
 					//render the list as json, using a "map[repo-name] = pr" structure for Jackson marshalling
 							consume { Iterable<Tuple2<String, Integer>> tupleList ->
-								render json(tupleList.inject([:]) { map, Tuple2<String, Integer> tuple -> map[tuple.t1] = tuple.t2; map })
+								tupleList.each { Tuple2<String, Integer> tuple ->
+									println "consumed $tuple.t1 = $tuple.t2"
+								}
+								//render json(tupleList.inject([:]) { map, Tuple2<String, Integer> tuple -> map[tuple.t1] = tuple.t2; map })
 							}.
 
 					//catch any errors and return them to the http response
 							when(Exception) { Exception ex ->
 								ex.printStackTrace()
-								response.status(503)
-								render json(ex.message)
-							}.
-					flush()
+								//response.status(503)
+								//render json(ex.message)
+							}//.flush()
+
+			render 'Hello'
 
 		}
 
