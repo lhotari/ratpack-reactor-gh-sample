@@ -33,8 +33,7 @@ ratpack {
 		get("orgs/:org/rank") { GithubService githubService ->
 
 			//fetch github Repos asynchronously
-			githubService.findRepositoriesByOrganizationId(allPathTokens.org).
-
+			githubService.findRepositoriesByOrganizationId((String)allPathTokens['org']).
 					//bind a promise for pull requests size per repo
 							mapMany { String repo ->
 								githubService.countPullRequestsByRepository(repo).map { Integer pr ->
